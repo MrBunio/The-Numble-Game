@@ -1,0 +1,989 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Numble - Number Puzzle Game</title>
+        <style>
+            * {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
+
+            body {
+                font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+                background: linear-gradient(135deg, #121213 0%, #1a1a1b 100%);
+                color: #ffffff;
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                position: relative;
+            }
+
+            .main-menu {
+                text-align: center;
+                padding: 40px 20px;
+                max-width: 500px;
+                width: 100%;
+                position: relative;
+            }
+
+            .game-title {
+                font-weight: 700;
+                font-size: 72px;
+                letter-spacing: 0.05em;
+                text-transform: uppercase;
+                margin-bottom: 20px;
+                color: #6aaa64;
+                text-shadow: 0 2px 10px rgba(106, 170, 100, 0.3);
+                position: relative;
+            }
+
+            .game-title::after {
+                content: "";
+                position: absolute;
+                bottom: -10px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 100px;
+                height: 4px;
+                background: linear-gradient(90deg, #6aaa64, #c9b458);
+                border-radius: 2px;
+            }
+
+            .game-subtitle {
+                font-size: 24px;
+                color: #d7dadc;
+                margin-bottom: 40px;
+                font-weight: 300;
+            }
+
+            .play-btn {
+                background: linear-gradient(to bottom, #6aaa64, #5c9a56);
+                border: none;
+                color: white;
+                padding: 20px 60px;
+                font-size: 24px;
+                font-weight: 600;
+                border-radius: 12px;
+                cursor: pointer;
+                margin: 30px 0;
+                transition: all 0.3s ease;
+                box-shadow: 0 4px 15px rgba(106, 170, 100, 0.4);
+                position: relative;
+                overflow: hidden;
+            }
+
+            .play-btn::before {
+                content: "";
+                position: absolute;
+                top: 0;
+                left: -100%;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(
+                    90deg,
+                    transparent,
+                    rgba(255, 255, 255, 0.2),
+                    transparent
+                );
+                transition: 0.5s;
+            }
+
+            .play-btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(106, 170, 100, 0.6);
+            }
+
+            .play-btn:hover::before {
+                left: 100%;
+            }
+
+            .game-info {
+                color: #818384;
+                font-size: 14px;
+                margin-top: 60px;
+                line-height: 1.6;
+                background: rgba(58, 58, 60, 0.2);
+                padding: 20px;
+                border-radius: 10px;
+            }
+
+            .puzzle-number {
+                font-size: 18px;
+                color: #d7dadc;
+                margin-top: 20px;
+                font-weight: 600;
+            }
+
+            .author {
+                margin-top: 40px;
+                color: #818384;
+                font-size: 16px;
+                text-align: center;
+                width: 100%;
+                padding: 15px;
+                border-top: 1px solid #3a3a3c;
+            }
+
+            .author span {
+                color: #6aaa64;
+                font-weight: bold;
+                display: inline-block;
+                margin-top: 5px;
+                font-size: 18px;
+                text-shadow: 0 0 10px rgba(106, 170, 100, 0.5);
+            }
+
+            .game-screen {
+                display: none;
+                width: 100%;
+                max-width: 500px;
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                width: 100%;
+                height: 60px;
+                padding: 0 16px;
+                border-bottom: 1px solid #3a3a3c;
+                background: rgba(26, 26, 27, 0.8);
+                backdrop-filter: blur(5px);
+            }
+
+            .title {
+                font-weight: 700;
+                font-size: 37px;
+                letter-spacing: 0.01em;
+                text-transform: uppercase;
+                text-align: center;
+                flex: 1;
+                background: linear-gradient(90deg, #6aaa64, #c9b458);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                text-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            }
+
+            .header-buttons {
+                display: flex;
+                gap: 8px;
+            }
+
+            .icon-button {
+                background: rgba(58, 58, 60, 0.5);
+                border: none;
+                color: #ffffff;
+                cursor: pointer;
+                font-size: 20px;
+                padding: 8px 12px;
+                border-radius: 6px;
+                transition: all 0.2s;
+            }
+
+            .icon-button:hover {
+                background: rgba(58, 58, 60, 0.8);
+                transform: scale(1.1);
+            }
+
+            .game-container {
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                flex: 1;
+                padding: 16px;
+            }
+
+            .board-container {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                flex: 1;
+            }
+
+            .game-board {
+                display: grid;
+                grid-template-rows: repeat(6, 1fr);
+                gap: 8px;
+                width: 350px;
+                height: 420px;
+            }
+
+            .tile-row {
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 8px;
+            }
+
+            .tile {
+                width: 100%;
+                display: inline-flex;
+                justify-content: center;
+                align-items: center;
+                font-size: 2rem;
+                font-weight: bold;
+                color: #ffffff;
+                background: none;
+                border: 2px solid #3a3a3c;
+                text-transform: uppercase;
+                user-select: none;
+                border-radius: 5px;
+                transition: all 0.2s;
+            }
+
+            .tile[data-state="empty"] {
+                border: 2px solid #3a3a3c;
+                background: rgba(58, 58, 60, 0.2);
+            }
+
+            .tile[data-state="tbd"] {
+                background: rgba(58, 58, 60, 0.5);
+                border: 2px solid #565758;
+                animation: pulse 1s infinite;
+            }
+
+            .tile[data-state="correct"] {
+                background: linear-gradient(135deg, #6aaa64, #5c9a56);
+                border-color: #6aaa64;
+                color: #ffffff;
+                box-shadow: 0 3px 8px rgba(106, 170, 100, 0.4);
+            }
+
+            .tile[data-state="present"] {
+                background: linear-gradient(135deg, #c9b458, #b2a250);
+                border-color: #c9b458;
+                color: #ffffff;
+                box-shadow: 0 3px 8px rgba(201, 180, 88, 0.4);
+            }
+
+            .tile[data-state="absent"] {
+                background: linear-gradient(135deg, #787c7e, #65686a);
+                border-color: #787c7e;
+                color: #ffffff;
+            }
+
+            .keyboard {
+                width: 100%;
+                max-width: 500px;
+                padding: 0 8px 8px;
+                margin-top: 20px;
+            }
+
+            .keyboard-row {
+                display: flex;
+                justify-content: center;
+                margin-bottom: 8px;
+            }
+
+            .key {
+                height: 58px;
+                min-width: 0;
+                flex: 1;
+                margin: 0 3px;
+                border: none;
+                border-radius: 6px;
+                background: linear-gradient(to bottom, #818384, #707273);
+                color: #ffffff;
+                font-weight: bold;
+                cursor: pointer;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                font-size: 16px;
+                transition: all 0.2s;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            }
+
+            .key:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            }
+
+            .key:active {
+                transform: translateY(0);
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+            }
+
+            .key.wide {
+                flex: 1.5;
+                font-size: 14px;
+            }
+
+            .key[data-state="correct"] {
+                background: linear-gradient(to bottom, #6aaa64, #5c9a56);
+            }
+
+            .key[data-state="present"] {
+                background: linear-gradient(to bottom, #c9b458, #b2a250);
+            }
+
+            .key[data-state="absent"] {
+                background: linear-gradient(to bottom, #3a3a3c, #2e2e30);
+            }
+
+            .toast {
+                position: fixed;
+                top: 50px;
+                left: 50%;
+                transform: translateX(-50%);
+                padding: 16px 20px;
+                background: linear-gradient(90deg, #1a1a1b, #2d2d2e);
+                color: #ffffff;
+                border-radius: 8px;
+                font-weight: 600;
+                z-index: 1000;
+                animation: toastSlideIn 0.3s ease;
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+                border-left: 4px solid #6aaa64;
+            }
+
+            @keyframes toastSlideIn {
+                from {
+                    opacity: 0;
+                    transform: translate(-50%, -20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translate(-50%, 0);
+                }
+            }
+
+            @keyframes pulse {
+                0% {
+                    opacity: 0.8;
+                }
+                50% {
+                    opacity: 1;
+                }
+                100% {
+                    opacity: 0.8;
+                }
+            }
+
+            @keyframes pop {
+                0% {
+                    transform: scale(1);
+                }
+                50% {
+                    transform: scale(1.1);
+                }
+                100% {
+                    transform: scale(1);
+                }
+            }
+
+            @keyframes flip {
+                0% {
+                    transform: rotateX(0);
+                }
+                50% {
+                    transform: rotateX(90deg);
+                }
+                100% {
+                    transform: rotateX(0);
+                }
+            }
+
+            .tile[data-animation="pop"] {
+                animation: pop 0.1s ease;
+            }
+
+            .tile[data-animation="flip"] {
+                animation: flip 0.5s ease;
+            }
+
+            .admin-panel {
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: linear-gradient(135deg, #2d2d2d, #1f1f1f);
+                padding: 25px;
+                border-radius: 15px;
+                border: 3px solid #6aaa64;
+                z-index: 1000;
+                box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+                display: none;
+                min-width: 300px;
+                text-align: center;
+            }
+
+            .admin-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.9);
+                z-index: 999;
+                display: none;
+            }
+
+            .admin-overlay.active,
+            .admin-panel.active {
+                display: block;
+            }
+
+            .admin-panel h3 {
+                background: linear-gradient(90deg, #6aaa64, #c9b458);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                margin-bottom: 20px;
+                font-size: 24px;
+            }
+
+            .admin-input {
+                background: #1a1a1b;
+                border: 2px solid #3a3a3c;
+                color: white;
+                padding: 15px;
+                border-radius: 8px;
+                width: 150px;
+                text-align: center;
+                font-size: 20px;
+                font-weight: bold;
+                margin: 15px auto;
+                display: block;
+                transition: all 0.3s;
+            }
+
+            .admin-input:focus {
+                outline: none;
+                border-color: #6aaa64;
+                box-shadow: 0 0 10px rgba(106, 170, 100, 0.5);
+            }
+
+            .admin-buttons {
+                display: flex;
+                gap: 15px;
+                justify-content: center;
+                margin-top: 20px;
+            }
+
+            .admin-btn {
+                background: linear-gradient(to bottom, #6aaa64, #5c9a56);
+                border: none;
+                color: white;
+                padding: 12px 25px;
+                border-radius: 8px;
+                cursor: pointer;
+                font-weight: bold;
+                font-size: 16px;
+                transition: all 0.2s;
+                box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+            }
+
+            .admin-btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 5px 12px rgba(0, 0, 0, 0.3);
+            }
+
+            .admin-btn.cancel {
+                background: linear-gradient(to bottom, #787c7e, #65686a);
+            }
+
+            .admin-btn.cancel:hover {
+                background: linear-gradient(to bottom, #878a8c, #75787a);
+            }
+
+            .secret-trigger {
+                position: fixed;
+                bottom: 10px;
+                right: 10px;
+                width: 40px;
+                height: 20px;
+                opacity: 0.05;
+                cursor: pointer;
+                z-index: 1001;
+                background: transparent;
+                border: none;
+            }
+
+            @media (max-width: 480px) {
+                .game-title {
+                    font-size: 48px;
+                }
+
+                .game-subtitle {
+                    font-size: 18px;
+                }
+
+                .play-btn {
+                    padding: 15px 40px;
+                    font-size: 20px;
+                }
+
+                .game-board {
+                    width: 300px;
+                    height: 360px;
+                }
+
+                .tile {
+                    font-size: 1.5rem;
+                }
+
+                .key {
+                    height: 50px;
+                    font-size: 12px;
+                }
+
+                .admin-panel {
+                    min-width: 280px;
+                    padding: 20px;
+                }
+
+                .admin-input {
+                    width: 130px;
+                    font-size: 18px;
+                }
+
+                .author {
+                    margin-top: 30px;
+                    font-size: 14px;
+                }
+
+                .author span {
+                    font-size: 16px;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="main-menu" id="mainMenu">
+            <div class="game-title">Numble</div>
+            <div class="game-subtitle">Guess the 4-digit number in 6 tries</div>
+
+            <button class="play-btn" onclick="startGame()">PLAY</button>
+
+            <div class="game-info">
+                <p>• Each guess must be a 4-digit number</p>
+                <p>• Digits can repeat in the number</p>
+                <p>• Colors will show how close your guess was</p>
+            </div>
+
+            <div class="puzzle-number">
+                No. #<span id="menuPuzzleNumber">1</span>
+            </div>
+
+            <div class="author">Created by <span>Bunio</span></div>
+        </div>
+
+        <div class="game-screen" id="gameScreen">
+            <div class="admin-overlay" id="adminOverlay"></div>
+
+            <div class="admin-panel" id="adminPanel">
+                <h3>Admin Panel</h3>
+                <input
+                    type="number"
+                    class="admin-input"
+                    id="adminNumber"
+                    placeholder="1234"
+                    min="0"
+                    max="9999"
+                    oninput="this.value = this.value.slice(0,4)"
+                />
+                <div class="admin-buttons">
+                    <button class="admin-btn" onclick="setDailyNumber()">
+                        Save Number
+                    </button>
+                    <button class="admin-btn cancel" onclick="hideAdminPanel()">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+
+            <button
+                class="secret-trigger"
+                id="secretTrigger"
+                title="Admin Access"
+            ></button>
+
+            <div class="header">
+                <div class="title">Numble</div>
+                <div class="header-buttons">
+                    <button class="icon-button" onclick="showHelp()">❓</button>
+                    <button class="icon-button" onclick="showStats()">
+                        📊
+                    </button>
+                </div>
+            </div>
+
+            <div class="game-container">
+                <div class="board-container">
+                    <div class="game-board" id="board"></div>
+                </div>
+            </div>
+
+            <div class="keyboard">
+                <div class="keyboard-row">
+                    <button class="key" data-key="1" onclick="pressKey('1')">
+                        1
+                    </button>
+                    <button class="key" data-key="2" onclick="pressKey('2')">
+                        2
+                    </button>
+                    <button class="key" data-key="3" onclick="pressKey('3')">
+                        3
+                    </button>
+                    <button class="key" data-key="4" onclick="pressKey('4')">
+                        4
+                    </button>
+                    <button class="key" data-key="5" onclick="pressKey('5')">
+                        5
+                    </button>
+                    <button class="key" data-key="6" onclick="pressKey('6')">
+                        6
+                    </button>
+                    <button class="key" data-key="7" onclick="pressKey('7')">
+                        7
+                    </button>
+                    <button class="key" data-key="8" onclick="pressKey('8')">
+                        8
+                    </button>
+                    <button class="key" data-key="9" onclick="pressKey('9')">
+                        9
+                    </button>
+                    <button class="key" data-key="0" onclick="pressKey('0')">
+                        0
+                    </button>
+                </div>
+                <div class="keyboard-row">
+                    <button class="key wide" onclick="pressEnter()">
+                        Enter
+                    </button>
+                    <button class="key wide" onclick="pressBackspace()">
+                        ⌫
+                    </button>
+                </div>
+            </div>
+
+            <div class="author">Created by <span>Bunio</span></div>
+        </div>
+
+        <script>
+            const ADMIN_CODE = "Bxnio22mv";
+            let codeInput = "";
+            let game;
+
+            class NumbleGame {
+                constructor() {
+                    this.dayNumber = 1;
+                    this.secretNumber = this.loadDailyNumber();
+                    this.maxAttempts = 6;
+                    this.currentAttempt = 0;
+                    this.currentGuess = "";
+                    this.gameOver = false;
+
+                    this.initializeBoard();
+                    this.setupEventListeners();
+                }
+
+                loadDailyNumber() {
+                    const savedNumber = localStorage.getItem(
+                        "numble_daily_number",
+                    );
+                    return savedNumber || "1234";
+                }
+
+                saveDailyNumber(number) {
+                    if (/^\d{4}$/.test(number)) {
+                        localStorage.setItem("numble_daily_number", number);
+                        this.secretNumber = number;
+                        this.showToast("Number saved!");
+                        return true;
+                    }
+                    this.showToast("Enter 4 digits!");
+                    return false;
+                }
+
+                initializeBoard() {
+                    const board = document.getElementById("board");
+                    board.innerHTML = "";
+
+                    for (let row = 0; row < this.maxAttempts; row++) {
+                        const rowDiv = document.createElement("div");
+                        rowDiv.className = "tile-row";
+
+                        for (let col = 0; col < 4; col++) {
+                            const tile = document.createElement("div");
+                            tile.className = "tile";
+                            tile.id = `tile-${row}-${col}`;
+                            tile.setAttribute("data-state", "empty");
+                            tile.textContent = "";
+                            rowDiv.appendChild(tile);
+                        }
+
+                        board.appendChild(rowDiv);
+                    }
+                }
+
+                setupEventListeners() {
+                    document.addEventListener("keydown", (e) => {
+                        if (this.gameOver) return;
+
+                        if (e.key >= "0" && e.key <= "9") {
+                            e.preventDefault();
+                            this.addDigit(e.key);
+                        } else if (e.key === "Backspace") {
+                            e.preventDefault();
+                            this.removeDigit();
+                        } else if (e.key === "Enter") {
+                            e.preventDefault();
+                            this.submitGuess();
+                        }
+                    });
+
+                    window.addEventListener("load", () => {
+                        document.body.focus();
+                    });
+                }
+
+                addDigit(digit) {
+                    if (this.currentGuess.length < 4) {
+                        this.currentGuess += digit;
+                        this.updateBoard();
+                    }
+                }
+
+                removeDigit() {
+                    if (this.currentGuess.length > 0) {
+                        this.currentGuess = this.currentGuess.slice(0, -1);
+                        this.updateBoard();
+                    }
+                }
+
+                updateBoard() {
+                    for (let i = 0; i < 4; i++) {
+                        const tile = document.getElementById(
+                            `tile-${this.currentAttempt}-${i}`,
+                        );
+                        if (i < this.currentGuess.length) {
+                            tile.textContent = this.currentGuess[i];
+                            tile.setAttribute("data-state", "tbd");
+                            tile.setAttribute("data-animation", "pop");
+                        } else {
+                            tile.textContent = "";
+                            tile.setAttribute("data-state", "empty");
+                            tile.removeAttribute("data-animation");
+                        }
+                    }
+                }
+
+                submitGuess() {
+                    if (this.currentGuess.length !== 4) {
+                        this.showToast("Enter 4 digits!");
+                        return;
+                    }
+
+                    this.evaluateGuess();
+
+                    if (this.currentGuess === this.secretNumber) {
+                        this.gameOver = true;
+                        this.showToast("You won!");
+                    } else if (this.currentAttempt === this.maxAttempts - 1) {
+                        this.gameOver = true;
+                        this.showToast(
+                            `Game over! Number: ${this.secretNumber}`,
+                        );
+                    } else {
+                        this.currentAttempt++;
+                        this.currentGuess = "";
+                    }
+                }
+
+                evaluateGuess() {
+                    for (let i = 0; i < 4; i++) {
+                        const tile = document.getElementById(
+                            `tile-${this.currentAttempt}-${i}`,
+                        );
+
+                        if (this.currentGuess[i] === this.secretNumber[i]) {
+                            tile.setAttribute("data-state", "correct");
+                            this.updateKeyState(
+                                this.currentGuess[i],
+                                "correct",
+                            );
+                        } else if (
+                            this.secretNumber.includes(this.currentGuess[i])
+                        ) {
+                            tile.setAttribute("data-state", "present");
+                            this.updateKeyState(
+                                this.currentGuess[i],
+                                "present",
+                            );
+                        } else {
+                            tile.setAttribute("data-state", "absent");
+                            this.updateKeyState(this.currentGuess[i], "absent");
+                        }
+
+                        tile.setAttribute("data-animation", "flip");
+                    }
+                }
+
+                updateKeyState(digit, state) {
+                    const key = document.querySelector(
+                        `.key[data-key="${digit}"]`,
+                    );
+                    if (key) {
+                        if (state === "correct") {
+                            key.setAttribute("data-state", "correct");
+                        } else if (
+                            state === "present" &&
+                            key.getAttribute("data-state") !== "correct"
+                        ) {
+                            key.setAttribute("data-state", "present");
+                        } else if (
+                            state === "absent" &&
+                            key.getAttribute("data-state") !== "correct" &&
+                            key.getAttribute("data-state") !== "present"
+                        ) {
+                            key.setAttribute("data-state", "absent");
+                        }
+                    }
+                }
+
+                showToast(message) {
+                    const toast = document.createElement("div");
+                    toast.className = "toast";
+                    toast.textContent = message;
+                    document.body.appendChild(toast);
+
+                    setTimeout(() => {
+                        toast.remove();
+                    }, 2000);
+                }
+
+                resetGame() {
+                    this.currentAttempt = 0;
+                    this.currentGuess = "";
+                    this.gameOver = false;
+                    this.initializeBoard();
+
+                    document.querySelectorAll(".key").forEach((key) => {
+                        key.removeAttribute("data-state");
+                    });
+                }
+            }
+
+            function checkSecretCode(key) {
+                codeInput += key;
+
+                if (codeInput.includes(ADMIN_CODE)) {
+                    showAdminPanel();
+                    codeInput = "";
+                }
+
+                if (codeInput.length > 10) {
+                    codeInput = codeInput.slice(-10);
+                }
+            }
+
+            function showAdminPanel() {
+                document.getElementById("adminOverlay").classList.add("active");
+                document.getElementById("adminPanel").classList.add("active");
+                document.getElementById("adminNumber").focus();
+            }
+
+            function hideAdminPanel() {
+                document
+                    .getElementById("adminOverlay")
+                    .classList.remove("active");
+                document
+                    .getElementById("adminPanel")
+                    .classList.remove("active");
+                codeInput = "";
+            }
+
+            function setDailyNumber() {
+                const numberInput = document.getElementById("adminNumber");
+                const number = numberInput.value;
+
+                if (game.saveDailyNumber(number)) {
+                    game.resetGame();
+                    numberInput.value = "";
+                    hideAdminPanel();
+                }
+            }
+
+            function startGame() {
+                document.getElementById("mainMenu").style.display = "none";
+                document.getElementById("gameScreen").style.display = "flex";
+
+                if (!game) {
+                    game = new NumbleGame();
+                } else {
+                    game.resetGame();
+                }
+
+                document.body.focus();
+            }
+
+            function pressKey(digit) {
+                if (!game.gameOver) {
+                    game.addDigit(digit);
+                }
+            }
+
+            function pressEnter() {
+                if (!game.gameOver) {
+                    game.submitGuess();
+                }
+            }
+
+            function pressBackspace() {
+                if (!game.gameOver) {
+                    game.removeDigit();
+                }
+            }
+
+            function showHelp() {
+                alert(
+                    "HOW TO PLAY:\n\nGuess the 4-digit number in 6 tries!\n\nAfter each guess:\nGreen - correct digit in correct position\nYellow - correct digit in wrong position\nGray - digit not in the number\n\nTip: Digits can repeat!",
+                );
+            }
+
+            function showStats() {
+                alert("Statistics coming soon!");
+            }
+
+            document.addEventListener("keydown", (e) => {
+                if (e.key.length === 1) {
+                    checkSecretCode(e.key);
+                }
+
+                if (
+                    e.key === "Escape" &&
+                    document
+                        .getElementById("adminPanel")
+                        .classList.contains("active")
+                ) {
+                    hideAdminPanel();
+                }
+            });
+
+            document
+                .getElementById("adminOverlay")
+                .addEventListener("click", hideAdminPanel);
+
+            document
+                .getElementById("adminNumber")
+                .addEventListener("keypress", function (e) {
+                    if (e.key === "Enter") {
+                        setDailyNumber();
+                    }
+                });
+
+            window.addEventListener("load", () => {
+                document.body.focus();
+                document.body.setAttribute("tabindex", "-1");
+            });
+        </script>
+    </body>
+</html>
